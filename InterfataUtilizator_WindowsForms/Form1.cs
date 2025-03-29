@@ -8,20 +8,20 @@ namespace InterfataUtilizator_WindowsForms
 {
     public partial class Form1 : Form
     {
-        // Etichete pentru antete
+        
         private Label lblIdHeader;
         private Label lblNumeHeader;
         private Label lblPrenumeHeader;
         private Label lblTipContHeader;
         private Label lblIbanHeader;
 
-        // Array-uri de etichete pentru date
+        
         private Label[] lblsId;
         private Label[] lblsNume;
         private Label[] lblsPrenume;
         private Label[] lblsTipCont;
         private Label[] lblsIban;
-
+        private Label[] lblsCarduri;
         private List<ContBancar> conturi;
 
         public Form1(List<ContBancar> conturi)
@@ -29,6 +29,7 @@ namespace InterfataUtilizator_WindowsForms
             InitializeComponent();
             this.conturi = conturi ?? new List<ContBancar>();
             SetupForm();
+            AfiseazaConturiSiCarduri();
         }
 
         private void SetupForm()
@@ -36,8 +37,8 @@ namespace InterfataUtilizator_WindowsForms
             this.Text = "Lista Conturi Bancare";
             this.Size = new Size(700, 500);
             this.AutoScroll = true;
+            this.BackColor = Color.White;
 
-            // Inițializare antete
             lblIdHeader = new Label { Text = "ID", Location = new Point(20, 20), AutoSize = true, Font = new Font("Arial", 10, FontStyle.Bold) };
             lblNumeHeader = new Label { Text = "Nume", Location = new Point(70, 20), AutoSize = true, Font = new Font("Arial", 10, FontStyle.Bold) };
             lblPrenumeHeader = new Label { Text = "Prenume", Location = new Point(170, 20), AutoSize = true, Font = new Font("Arial", 10, FontStyle.Bold) };
@@ -50,10 +51,10 @@ namespace InterfataUtilizator_WindowsForms
             this.Controls.Add(lblTipContHeader);
             this.Controls.Add(lblIbanHeader);
 
-            AfiseazaConturi();
+            AfiseazaConturiSiCarduri();
         }
 
-        private void AfiseazaConturi()
+        private void AfiseazaConturiSiCarduri()
         {
             if (conturi == null || conturi.Count == 0)
             {
@@ -62,14 +63,14 @@ namespace InterfataUtilizator_WindowsForms
                 return;
             }
 
-            // Inițializare array-uri
+            
             int count = conturi.Count;
             lblsId = new Label[count];
             lblsNume = new Label[count];
             lblsPrenume = new Label[count];
             lblsTipCont = new Label[count];
             lblsIban = new Label[count];
-
+            lblsCarduri = new Label[count];
             int topPosition = 50;
 
             for (int i = 0; i < count; i++)
@@ -122,7 +123,59 @@ namespace InterfataUtilizator_WindowsForms
                 this.Controls.Add(lblsIban[i]);
 
                 topPosition += 30;
+                if (conturi[i].carduri.Count > 0)
+                {
+                    foreach (var card in conturi[i].carduri)
+                    {
+                        string cardInfo = $"• Card: {FormatCardNumber(card.NumarCard)} " +
+                                        $"Exp: {card.DataExpirare:MM/yyyy} " +
+                                        $"Sold: {card.SoldInitial} {card.Moneda}";
+
+                        Label lblCard = new Label
+                        {
+                            Text = cardInfo,
+                            Location = new Point(40, topPosition),
+                            ForeColor = Color.DarkBlue,
+                            AutoSize = true
+                        };
+                        this.Controls.Add(lblCard);
+                        topPosition += 20;
+                    }
+                }
+                else
+                {
+                    Label lblNoCards = new Label
+                    {
+                        Text = "Nu există carduri asociate",
+                        Location = new Point(40, topPosition),
+                        ForeColor = Color.Gray,
+                        Font = new Font("Arial", 8, FontStyle.Italic)
+                    };
+                    this.Controls.Add(lblNoCards);
+                    topPosition += 20;
+                }
+
+                // Linie separator
+                Panel separator = new Panel
+                {
+                    BackColor = Color.LightGray,
+                    Height = 1,
+                    Width = this.ClientSize.Width - 40,
+                    Location = new Point(20, topPosition)
+                };
+                this.Controls.Add(separator);
+                topPosition += 15;
             }
         }
+
+        private string FormatCardNumber(string cardNumber)
+        {
+            if (string.IsNullOrEmpty(cardNumber) || cardNumber.Length != 16)
+                return cardNumber;
+
+            return $"{cardNumber.Substring(0, 4)} {cardNumber.Substring(4, 4)} " +
+                   $"{cardNumber.Substring(8, 4)} {cardNumber.Substring(12, 4)}";
+        }
+        
     }
 }
