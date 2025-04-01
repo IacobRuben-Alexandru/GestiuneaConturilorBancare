@@ -3,3 +3,4 @@
 5;Doris;Iacob;doris_iacob@gmail.com;dorisiacob;ContInvestitii;RO38 RFSN 1B31 9400 5625 0026
 6;Iacob;Ruben;iacobruben29@gmail.com;iacobruben29;ContFirma;RO97 INGr 1B31 2975 4512 6478
 7;Levi;Clipa;leviclipa@gmail.com;leviclipalevi;ContInvestitii;RO34 BNDR 1B31 9051 8066 1654
+8;Victor;Candrea;victorcandrea@gmail.com;candreavictor;ContEconomii;RO89 BNDR 1B31 8564 9391 4809
