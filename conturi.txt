@@ -1,6 +1,6 @@
 0;Admin;Admin;admin@gmail.com;AdminAdminAdmin;NULL;AAAA AAAA 0000 0000 0000 0000
-3;Daniele;Andronache;daniele_andr@gmail.com;DanieleAndr;ContEconomii;RO71 RFSN 1B31 4123 1604 9583
 5;Doris;Iacob;doris_iacob@gmail.com;dorisiacob;ContInvestitii;RO38 RFSN 1B31 9400 5625 0026
-6;Iacob;Ruben;iacobruben29@gmail.com;iacobruben29;ContFirma;RO97 INGr 1B31 2975 4512 6478
 7;Levi;Clipa;leviclipa@gmail.com;leviclipalevi;ContInvestitii;RO34 BNDR 1B31 9051 8066 1654
-8;Victor;Candrea;victorcandrea@gmail.com;candreavictor;ContEconomii;RO89 BNDR 1B31 8564 9391 4809
+9;Iacob;Carol;iacobcarol02@gmail.com;iacobcarol;ContCurent;RO44 BTRL 1B31 6968 8233 6485
+10;Simona;Iacob;iacobsimona@gmail.com;iacobsimona;ContCurent;RO54 BTRL 1B31 2765 7008 0328
+11;Victor;Ponta;victorponta@gmail.com;victorponta;ContCurent;RO10 BTRL 1B31 9236 5583 1275

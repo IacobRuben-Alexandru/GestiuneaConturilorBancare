@@ -12,7 +12,7 @@ namespace LibrariiModeleBanking
      
     public class ContBancar
     {
-        public List<Card> carduri = new List<Card>();
+        public List<Card> carduri { get; set; } = new List<Card>();
         public int Id { get; set; }
         public string Nume { get; set; }
         public string Prenume { get; set; } 

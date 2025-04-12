@@ -226,15 +226,15 @@ namespace Managers
             {
 
 
-                //caleFisierCarduri = "carduri.txt";
-                Console.WriteLine("Carduri de salvat:");
-                foreach (var cont in conturi)
-                {
-                    foreach (var card in cont.carduri)
-                    {
-                        Console.WriteLine(card.ToString());
-                    }
-                }
+                ////caleFisierCarduri = "carduri.txt";
+                //Console.WriteLine("Carduri de salvat:");
+                //foreach (var cont in conturi)
+                //{
+                //    foreach (var card in cont.carduri)
+                //    {
+                //        Console.WriteLine(card.ToString());
+                //    }
+                //}
                 //List<string> linii = new List<string>();
                 for (int i = 0; i < conturi.Count; i++)
                 {
@@ -244,14 +244,14 @@ namespace Managers
                         
                         foreach (var card in conturi[i].carduri)
                         {
-                            Console.WriteLine(card.ToString());
+                            //Console.WriteLine(card.ToString());
                             writer.WriteLine(card.ToString());
                             //linii.Add(card.ToString());
                         }
                     }
                     else
                     {
-                        Console.WriteLine($"Contul {conturi[i].Nume} {conturi[i].Prenume} nu are carduri asociate.");
+                        //Console.WriteLine($"Contul {conturi[i].Nume} {conturi[i].Prenume} nu are carduri asociate.");
                     }
                 }
 
