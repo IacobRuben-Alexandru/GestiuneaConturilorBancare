@@ -315,7 +315,7 @@ namespace Managers
                         }
 
                         string[] date = linie.Split(';');
-                        if (date.Length == 7) 
+                        if (date.Length == 8) 
                         {
                             int idCont = int.Parse(date[0]);
                             string numarCard = date[1];
@@ -324,8 +324,8 @@ namespace Managers
                             int cvv = int.Parse(date[2]);
                             double sold = double.Parse(date[5]);
                             string moneda = date[6];//return $"{Id};{NumarCard};{CVV};{DataExpirare.ToString("dd/MM/yyyy")};{PIN};{SoldInitial};{Moneda}";
-
-                            Card card = new Card(idCont, cvv, dataExpirare, numarCard, pin, sold, moneda);
+                            bool esteActiv = date[7] == "1" ? true : false;
+                            Card card = new Card(idCont, cvv, dataExpirare, numarCard, pin, sold, moneda, esteActiv);
 
                            
                             /*if (cont != null)

@@ -4,3 +4,4 @@
 9;Iacob;Carol;iacobcarol02@gmail.com;iacobcarol;ContCurent;RO44 BTRL 1B31 6968 8233 6485
 10;Simona;Iacob;iacobsimona@gmail.com;iacobsimona;ContCurent;RO54 BTRL 1B31 2765 7008 0328
 11;Victor;Ponta;victorponta@gmail.com;victorponta;ContCurent;RO10 BTRL 1B31 9236 5583 1275
+12;Alin;Serban;alinserban@gmail.com;alinserban;ContEconomii;RO05 RFSN 1B31 4446 3409 7745

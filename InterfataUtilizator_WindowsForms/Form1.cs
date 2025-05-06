@@ -139,6 +139,30 @@ namespace InterfataUtilizator_WindowsForms
             pnlLogin.Controls.Add(btnLogin);
             pnlLogin.Controls.Add(btnCreate);
         }
+        private void BtnLogin_Click(object sender, EventArgs e)
+        {
+            string email = txtLoginEmail.Text;
+            string parola = txtLoginParola.Text;
+
+            contLogat = conturi.FirstOrDefault(c => c.Email == email && c.Parola == parola);
+
+            if (contLogat != null)
+            {
+                isLoggedIn = true;
+                this.Controls.Remove(pnlLogin);
+
+                MessageBox.Show($"Bun venit, {contLogat.Nume} {contLogat.Prenume}!", "Logare reușită");
+                SetupForm();
+
+
+                btnCreate.Visible = false;
+            }
+            else
+            {
+                MessageBox.Show("Email sau parolă incorecte!", "Eroare la logare", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtLoginParola.Clear();
+            }
+        }
         private void Create(object sender, EventArgs e)
         {
             this.Size = new Size(700, 600);
@@ -169,30 +193,7 @@ namespace InterfataUtilizator_WindowsForms
             
 
         }
-        private void BtnLogin_Click(object sender, EventArgs e)
-        {
-            string email = txtLoginEmail.Text;
-            string parola = txtLoginParola.Text;
-
-            contLogat = conturi.FirstOrDefault(c => c.Email == email && c.Parola == parola);
-
-            if (contLogat != null)
-            {
-                isLoggedIn = true;
-                this.Controls.Remove(pnlLogin);
-                
-                MessageBox.Show($"Bun venit, {contLogat.Nume} {contLogat.Prenume}!", "Logare reușită");
-                SetupForm();
-                
-
-                btnCreate.Visible = false;
-            }
-            else
-            {
-                MessageBox.Show("Email sau parolă incorecte!", "Eroare la logare", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                txtLoginParola.Clear();
-            }
-        }
+        
 
         private void SetupForm()
         {
@@ -209,6 +210,129 @@ namespace InterfataUtilizator_WindowsForms
             {
                 ShowAdminMenu();
                 //AfiseazaConturiAdmin();
+            }
+        }
+
+        private void SetupAddAccountControls(Panel container)
+        {
+            Label lblAdaugaCont = new Label
+            {
+                Text = "Adaugă Cont Nou",
+                Location = new Point(10, 10),
+                AutoSize = true,
+                Font = new Font("Arial", 12, FontStyle.Bold)
+            };
+            container.Controls.Add(lblAdaugaCont);
+
+            // Nume
+            Label lblNume = new Label { Text = "Nume:", Location = new Point(10, 40), AutoSize = true };
+            txtNume = new TextBox { Location = new Point(100 - 10, 50 - 10), Width = 150 };
+            container.Controls.Add(lblNume);
+            container.Controls.Add(txtNume);
+
+            // Prenume
+            Label lblPrenume = new Label { Text = "Prenume:", Location = new Point(20 - 10, 80 - 10), AutoSize = true };
+            txtPrenume = new TextBox { Location = new Point(100 - 10, 80 - 10), Width = 150 };
+            container.Controls.Add(lblPrenume);
+            container.Controls.Add(txtPrenume);
+
+            // Email
+            Label lblEmail = new Label { Text = "Email:", Location = new Point(20 - 10, 110 - 10), AutoSize = true };
+            txtEmail = new TextBox { Location = new Point(100 - 10, 110 - 10), Width = 150 };
+            container.Controls.Add(lblEmail);
+            container.Controls.Add(txtEmail);
+
+            // Parola
+            Label lblParola = new Label { Text = "Parola:", Location = new Point(270, 140 - 100), AutoSize = true };
+            txtParola = new TextBox { Location = new Point(340, 40), Width = 150, PasswordChar = '*' };
+            container.Controls.Add(lblParola);
+            container.Controls.Add(txtParola);
+
+            // Tip Cont
+            Label lblTipCont = new Label { Text = "Tip Cont:", Location = new Point(270, 70), AutoSize = true };
+            cmbTipCont = new ComboBox
+            {
+                Location = new Point(340, 70),
+                Width = 150,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            cmbTipCont.Items.AddRange(new string[] { "ContCurent", "ContEconomii", "ContInvestitii", "ContFirma" });
+            cmbTipCont.SelectedIndex = 0;
+            container.Controls.Add(lblTipCont);
+            container.Controls.Add(cmbTipCont);
+
+            // Banca
+            Label lblBanca = new Label { Text = "Banca:", Location = new Point(270, 100), AutoSize = true };
+            cmbBanca = new ComboBox
+            {
+                Location = new Point(340, 100),
+                Width = 150,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            cmbBanca.Items.AddRange(new string[] { "BTRL", "BNDR", "RFSN", "INGr" });
+            cmbBanca.SelectedIndex = 0;
+            container.Controls.Add(lblBanca);
+            container.Controls.Add(cmbBanca);
+
+            btnAdaugaCont = new Button
+            {
+                Text = "Adaugă Cont",
+                Location = new Point(510, 70),
+                Size = new Size(100, 30),
+                BackColor = Color.LightGreen
+            };
+            btnAdaugaCont.Click += BtnAdaugaCont_Click;
+            container.Controls.Add(btnAdaugaCont);
+
+        }
+
+        private void BtnAdaugaCont_Click(object sender, EventArgs e)
+        {
+
+            if (string.IsNullOrWhiteSpace(txtNume.Text) ||
+                string.IsNullOrWhiteSpace(txtPrenume.Text) ||
+                string.IsNullOrWhiteSpace(txtEmail.Text) ||
+                string.IsNullOrWhiteSpace(txtParola.Text))
+            {
+                MessageBox.Show("Toate câmpurile sunt obligatorii!", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+
+                int newId = conturi.Count > 0 ? conturi.Max(c => c.Id) + 1 : 1;
+
+
+                ContBancar newCont = new ContBancar(
+                    id: newId,
+                    nume: txtNume.Text,
+                    prenume: txtPrenume.Text,
+                    email: txtEmail.Text,
+                    parola: txtParola.Text,
+                    tipcont: cmbTipCont.SelectedItem.ToString(),
+                    banca: cmbBanca.SelectedItem.ToString(),
+                    ib: 0
+                );
+
+
+                conturi.Add(newCont);
+                ManagerCont.SalveazaConturiInFisier(@"..\\..\\..\\conturi.txt", conturi);
+
+                txtNume.Clear();
+                txtPrenume.Clear();
+                txtEmail.Clear();
+                txtParola.Clear();
+                cmbTipCont.SelectedIndex = 0;
+                cmbBanca.SelectedIndex = 0;
+
+                RefreshAccountDisplay();
+
+                MessageBox.Show("Cont adăugat cu succes!", "Succes", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Eroare la adăugarea contului: {ex.Message}", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -272,10 +396,23 @@ namespace InterfataUtilizator_WindowsForms
             };
             this.Controls.Add(btnAddCard);
 
+            Button btnGestionare = new Button
+            {
+                Text = "Gestionare Card",
+                Location = new Point(150, 240),
+                Size = new Size(200, 40),
+                BackColor = Color.LightPink
+            };
+            btnGestionare.Click += (s, e) => {
+                this.Controls.Clear();
+                SetupGestionare(contLogat.Id);
+            };
+            this.Controls.Add(btnGestionare);
+
             Button btnDelete = new Button
             {
                 Text = "Stergere Card",
-                Location = new Point(150, 240),
+                Location = new Point(150, 300),
                 Size = new Size(200, 40),
                 BackColor = Color.Red
             };
@@ -283,6 +420,76 @@ namespace InterfataUtilizator_WindowsForms
                 this.Controls.Clear();
                 SetupAnulareCard(contLogat.Id);
                 
+            };
+            this.Controls.Add(btnDelete);
+
+            Button btnLogout = new Button
+            {
+                Text = "Delogare",
+                Location = new Point(150, 360),
+                Size = new Size(200, 40),
+                BackColor = Color.LightCoral
+            };
+            btnLogout.Click += BtnDelogare_Click;
+            this.Controls.Add(btnLogout);
+        }
+
+        private void ShowAdminMenu()
+        {
+            this.Controls.Clear();
+            this.Text = "Panou Administrator";
+            this.Size = new Size(500, 400);
+
+            Label lblTitle = new Label
+            {
+                Text = "Meniu Administrator",
+                Font = new Font("Arial", 16, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(150, 50)
+            };
+            this.Controls.Add(lblTitle);
+
+
+            Button btnViewAll = new Button
+            {
+                Text = "Vizualizare Conturi",
+                Location = new Point(150, 120),
+                Size = new Size(200, 40),
+                BackColor = Color.LightBlue
+            };
+            btnViewAll.Click += (s, e) => {
+                this.Controls.Clear();
+                AfiseazaConturiAdmin();
+                AddBackToMenuButton(100);
+            };
+            this.Controls.Add(btnViewAll);
+
+
+            Button btnAddAccount = new Button
+            {
+                Text = "Adăugare Cont Nou",
+                Location = new Point(150, 180),
+                Size = new Size(200, 40),
+                BackColor = Color.LightGreen
+            };
+            btnAddAccount.Click += (s, e) => {
+                this.Controls.Clear();
+                Create(s, e);
+                AddBackToMenuButton(0);
+            };
+            this.Controls.Add(btnAddAccount);
+
+            Button btnDelete = new Button
+            {
+                Text = "Stergere Cont",
+                Location = new Point(150, 240),
+                Size = new Size(200, 40),
+                BackColor = Color.Red
+            };
+            btnDelete.Click += (s, e) => {
+                this.Controls.Clear();
+                Delete(s, e);
+                AddBackToMenuButton(0);
             };
             this.Controls.Add(btnDelete);
 
@@ -297,105 +504,213 @@ namespace InterfataUtilizator_WindowsForms
             this.Controls.Add(btnLogout);
         }
 
-        private void SetupAnulareCard(int idCont)
+        private void AddBackToMenuButton(int x)
         {
-            this.Controls.Clear();
-
-            Label lblHeader = new Label
-            {
-                Text = "Anulare Card",
-                Font = new Font("Arial", 14, FontStyle.Bold),
-                Location = new Point(20, 20),
-                AutoSize = true
-            };
-            this.Controls.Add(lblHeader);
-
-            Label lblCvv = new Label
-            {
-                Text = "Introduceți CVV-ul cardului:",
-                Location = new Point(20, 60),
-                AutoSize = true
-            };
-            this.Controls.Add(lblCvv);
-
-            TextBox txtCvv = new TextBox
-            {
-                Location = new Point(20, 90),
-                Width = 100,
-                MaxLength = 3,
-                PasswordChar = '*'
-            };
-            this.Controls.Add(txtCvv);
-
-            Button btnAnuleaza = new Button
-            {
-                Text = "Anulează Card",
-                Location = new Point(20, 130),
-                Size = new Size(120, 30),
-                BackColor = Color.LightCoral
-            };
-            btnAnuleaza.Click += (s, e) =>
-            {
-                if (txtCvv.Text.Length != 3 || !txtCvv.Text.All(char.IsDigit))
-                {
-                    MessageBox.Show("CVV invalid! Introduceți exact 3 cifre.");
-                    return;
-                }
-
-                AnulareCard(idCont, txtCvv.Text);
-            };
-            this.Controls.Add(btnAnuleaza);
-
             Button btnBack = new Button
             {
-                Text = "Înapoi",
-                Location = new Point(150, 130),
-                Size = new Size(80, 30),
+                Text = "Înapoi la Meniu",
+                Location = new Point(10, 200 + x),
+                Size = new Size(120, 30),
                 BackColor = Color.LightGray
             };
-            btnBack.Click += (s, e) => MeniuUtilizator();
+            btnBack.Click += (s, e) => {
+                this.Controls.Clear();
+                ShowAdminMenu();
+            };
             this.Controls.Add(btnBack);
         }
 
-        public bool AnulareCard(int idCont, string cvv)
+        private void AfiseazaConturiAdmin()
         {
-            try
+            int startY = 10;
+
+            Panel contentPanel = new Panel
             {
-                var cont = conturi.FirstOrDefault(c => c.Id == idCont);
-                if (cont == null)
+                Location = new Point(10, 10),
+                Size = new Size(this.ClientSize.Width - 30, this.ClientSize.Height - 100),
+                AutoScroll = true,
+                BorderStyle = BorderStyle.FixedSingle
+            };
+            this.Controls.Add(contentPanel);
+
+            Label lblIdHeader = new Label { Text = "ID", Location = new Point(10, 10), Font = new Font("Arial", 10, FontStyle.Bold) };
+            Label lblNumeHeader = new Label { Text = "Nume", Location = new Point(60, 10), Font = new Font("Arial", 10, FontStyle.Bold) };
+
+            contentPanel.Controls.Add(lblIdHeader);
+            contentPanel.Controls.Add(lblNumeHeader);
+
+            startY = 40;
+            int ok = 1;
+
+            foreach (var cont in conturi)
+            {
+
+                Panel contPanel = new Panel
                 {
-                    MessageBox.Show("Contul nu există!");
-                    return false;
+                    Location = new Point(10, startY),
+                    Size = new Size(contentPanel.Width - 40, 100),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    BackColor = Color.White
+                };
+
+
+                Label lblId = new Label { Text = cont.Id.ToString(), Location = new Point(10, 10), AutoSize = true };
+                Label lblNume = new Label { Text = cont.Nume, Location = new Point(60, 10), AutoSize = true };
+                contPanel.Controls.Add(lblId);
+                contPanel.Controls.Add(lblNume);
+
+                int cardY = 35;
+
+                if (cont.carduri.Count > 0)
+                {
+                    foreach (var card in cont.carduri)
+                    {
+                        Label lblCard = new Label
+                        {
+                            Text = $"• Card: {FormatCardNumber(card.NumarCard)} | Exp: {card.DataExpirare:MM/yyyy} | Sold: {card.SoldInitial} | Tip moneda: {card.Moneda} | Status: {card.EsteActiv}",
+                            Location = new Point(20, cardY),
+                            AutoSize = true,
+                            ForeColor = Color.DarkGreen
+                        };
+                        contPanel.Controls.Add(lblCard);
+                        cardY += 25;
+                    }
+                }
+                else
+                {
+                    Label lblNoCards = new Label
+                    {
+                        Text = "Nu există carduri asociate",
+                        Location = new Point(20, cardY),
+                        AutoSize = true,
+                        ForeColor = Color.Gray
+                    };
+                    contPanel.Controls.Add(lblNoCards);
+                    cardY += 25;
                 }
 
-                var card = cont.carduri.FirstOrDefault(c => c.CVV.ToString() == cvv);
-                if (card == null)
+
+                contPanel.Height = cardY + 10;
+                contentPanel.Controls.Add(contPanel);
+                startY += contPanel.Height + 10;
+
+            }
+
+
+        }
+
+        private string FormatCardNumber(string cardNumber)
+        {
+            if (string.IsNullOrEmpty(cardNumber) || cardNumber.Length != 16)
+                return cardNumber;
+
+            return $"{cardNumber.Substring(0, 4)} {cardNumber.Substring(4, 4)} " +
+                   $"{cardNumber.Substring(8, 4)} {cardNumber.Substring(12, 4)}";
+        }
+
+        private void AfiseazaConturiSiCarduri(int idContLogat)
+        {
+            this.AutoScroll = true;
+            this.AutoScrollMargin = new Size(0, 20);
+            this.AutoScrollMinSize = new Size(800, 1000);
+
+
+            foreach (var control in this.Controls.OfType<Control>().Where(c => c.Tag?.ToString() == "accountDisplay").ToList())
+            {
+                this.Controls.Remove(control);
+            }
+
+
+
+            foreach (Control control in this.Controls)
+            {
+                if (control is Panel panel && panel.BackColor == Color.AliceBlue)
                 {
-                    MessageBox.Show("Nu există niciun card cu acest CVV în cont!");
-                    return false;
+                    panel.Visible = false;
+                    break;
+                }
+            }
+            int startY = idContLogat == 0 ? 50 : 20;
+
+            if (conturi == null || conturi.Count == 0)
+            {
+                Label lblEmpty = new Label { Text = "Nu există conturi de afișat", Location = new Point(20, startY), AutoSize = true };
+                this.Controls.Add(lblEmpty);
+                return;
+            }
+
+
+            var conturiDeAfisat = idContLogat == 0
+                ? conturi
+                : conturi.Where(c => c.Id == idContLogat).ToList();
+
+            foreach (var cont in conturiDeAfisat)
+            {
+
+                if (idContLogat == 0)
+                {
+
+                }
+                else
+                {
+                    var lblInfoCont = new Label
+                    {
+                        Text = $"Contul tău: {cont.Nume} {cont.Prenume} ({cont.TipCont}) - IBAN: {cont.IBAN}",
+                        Location = new Point(20, startY),
+                        AutoSize = true,
+                        Font = new Font("Arial", 10, FontStyle.Bold)
+                    };
+                    this.Controls.Add(lblInfoCont);
+                    startY += 30;
+
+
+                    if (cont.carduri.Count > 0)
+                    {
+                        foreach (var card in cont.carduri)
+                        {
+                            string cardInfo = $"• Card: {FormatCardNumber(card.NumarCard)} " +
+                                            $"Exp: {card.DataExpirare:MM/yyyy} " +
+                                            $"Sold: {card.SoldInitial} {card.Moneda}";
+
+                            Label lblCard = new Label
+                            {
+                                Text = cardInfo,
+                                Location = new Point(40, startY),
+                                ForeColor = Color.DarkBlue,
+                                AutoSize = true
+                            };
+                            this.Controls.Add(lblCard);
+                            startY += 25;
+                        }
+                    }
+                    else
+                    {
+                        Label lblNoCards = new Label
+                        {
+                            Text = "Nu există carduri asociate",
+                            Location = new Point(40, startY + 5),
+                            ForeColor = Color.Gray,
+                            Font = new Font("Arial", 8, FontStyle.Italic)
+                        };
+                        this.Controls.Add(lblNoCards);
+                        startY += 25;
+                    }
                 }
 
-                var confirmResult = MessageBox.Show(
-                    $"Sigur doriți să anulați cardul cu numărul {FormatCardNumber(card.NumarCard)}?",
-                    "Confirmare anulare card",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning);
 
-                if (confirmResult != DialogResult.Yes)
-                    return false;
-
-                cont.carduri.Remove(card);
-
-                ActualizeazaFisierCarduri();
-
-                MessageBox.Show("Card anulat cu succes!");
-                return true;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Eroare la anulare card: {ex.Message}");
-                return false;
-            }
+            //if (idContLogat != 0)
+            //{
+            //    btnDelogare = new Button
+            //    {
+            //        Text = "Delogare",
+            //        Location = new Point(250, 200),
+            //        Size = new Size(100, 30),
+            //        BackColor = Color.LightCoral,
+            //    };
+            //    btnDelogare.Click += BtnDelogare_Click;
+            //    this.Controls.Add(btnDelogare);
+            //}
         }
 
         private void SetupAddCardControls(int idCont)
@@ -501,7 +816,7 @@ namespace InterfataUtilizator_WindowsForms
         {
             try
             {
-               
+
                 var cont = conturi.FirstOrDefault(c => c.Id == idCont);
                 if (cont == null)
                 {
@@ -509,25 +824,26 @@ namespace InterfataUtilizator_WindowsForms
                     return;
                 }
 
-                
+
                 int cvv = new Random().Next(100, 1000);
                 DateTime dataExpirare = DateTime.Now.AddYears(4);
                 string numarCard = CreateUnique16DigitString();
-             
+
                 Card cardNou = new Card(
-                    id: idCont,       
+                    id: idCont,
                     CVV: cvv,
                     DataExpirare: dataExpirare,
                     NumarCard: numarCard,
                     Pin: pin,
                     sold: sold,
-                    moneda: moneda
+                    moneda: moneda,
+                    esteActiv: true
                 );
 
-                
+
                 cont.carduri.Add(cardNou);
 
-                
+
                 ActualizeazaFisierCarduri();
 
                 MessageBox.Show($"Card adăugat cu succes! ID Card: {idCont}");
@@ -539,102 +855,6 @@ namespace InterfataUtilizator_WindowsForms
             }
         }
 
-        private void ActualizeazaFisierCarduri()
-        {
-            string caleFisier = @"..\\..\\..\\carduri.txt";
-
-            var toateCardurile = conturi
-                .SelectMany(c => c.carduri)
-                .OrderBy(c => c.Id) 
-                .ToList();
-
-            using (StreamWriter writer = new StreamWriter(caleFisier, false))
-            {
-                foreach (var card in toateCardurile)
-                {
-                    writer.WriteLine($"{card.Id};{card.NumarCard};{card.CVV};{card.DataExpirare:dd/MM/yyyy};{card.PIN};{card.SoldInitial};{card.Moneda}");
-                }
-            }
-        }
-
-        private void AfiseazaConturiAdmin()
-        {
-            int startY = 10;
-
-            Panel contentPanel = new Panel
-            {
-                Location = new Point(10, 10),
-                Size = new Size(this.ClientSize.Width - 30, this.ClientSize.Height - 100),
-                AutoScroll = true,
-                BorderStyle = BorderStyle.FixedSingle
-            };
-            this.Controls.Add(contentPanel);
-
-            Label lblIdHeader = new Label { Text = "ID", Location = new Point(10, 10), Font = new Font("Arial", 10, FontStyle.Bold) };
-            Label lblNumeHeader = new Label { Text = "Nume", Location = new Point(60, 10), Font = new Font("Arial", 10, FontStyle.Bold) };
-
-            contentPanel.Controls.Add(lblIdHeader);
-            contentPanel.Controls.Add(lblNumeHeader);
-
-            startY = 40;
-            int ok = 1;
-
-            foreach (var cont in conturi)
-            {
-                
-                Panel contPanel = new Panel
-                {
-                    Location = new Point(10, startY),
-                    Size = new Size(contentPanel.Width - 40, 100), 
-                    BorderStyle = BorderStyle.FixedSingle,
-                    BackColor = Color.White
-                };
-
-                
-                Label lblId = new Label { Text = cont.Id.ToString(), Location = new Point(10, 10), AutoSize = true };
-                Label lblNume = new Label { Text = cont.Nume, Location = new Point(60, 10), AutoSize = true };
-                contPanel.Controls.Add(lblId);
-                contPanel.Controls.Add(lblNume);
-
-                int cardY = 35;
-
-                if (cont.carduri.Count > 0)
-                {
-                    foreach (var card in cont.carduri)
-                    {
-                        Label lblCard = new Label
-                        {
-                            Text = $"• Card: {FormatCardNumber(card.NumarCard)} | Exp: {card.DataExpirare:MM/yyyy} | Sold: {card.SoldInitial} {card.Moneda}",
-                            Location = new Point(20, cardY),
-                            AutoSize = true,
-                            ForeColor = Color.DarkGreen
-                        };
-                        contPanel.Controls.Add(lblCard);
-                        cardY += 25;
-                    }
-                }
-                else
-                {
-                    Label lblNoCards = new Label
-                    {
-                        Text = "Nu există carduri asociate",
-                        Location = new Point(20, cardY),
-                        AutoSize = true,
-                        ForeColor = Color.Gray
-                    };
-                    contPanel.Controls.Add(lblNoCards);
-                    cardY += 25;
-                }
-                
-
-                contPanel.Height = cardY + 10;
-                contentPanel.Controls.Add(contPanel);
-                startY += contPanel.Height + 10;
-               
-            }
-            
-
-        }
         private static HashSet<string> Results = new HashSet<string>();
         private static Random RNG = new Random();
         private string Create16DigitString()
@@ -656,6 +876,547 @@ namespace InterfataUtilizator_WindowsForms
 
             return result;
         }
+
+        private void ActualizeazaFisierCarduri()
+        {
+            string caleFisier = @"..\\..\\..\\carduri.txt";
+
+            var toateCardurile = conturi
+                .SelectMany(c => c.carduri)
+                .OrderBy(c => c.Id)
+                .ToList();
+
+            using (StreamWriter writer = new StreamWriter(caleFisier, false))
+            {
+                foreach (var card in toateCardurile)
+                {
+                    writer.WriteLine($"{card.Id};{card.NumarCard};{card.CVV};{card.DataExpirare:dd/MM/yyyy};{card.PIN};{card.SoldInitial};{card.Moneda};{(card.EsteActiv ? 1 : 0)}");
+                }
+            }
+        }
+
+        private void SetupAnulareCard(int idCont)
+        {
+            this.Controls.Clear();
+
+            Label lblHeader = new Label
+            {
+                Text = "Stergere Card",
+                Font = new Font("Arial", 14, FontStyle.Bold),
+                Location = new Point(20, 20),
+                AutoSize = true
+            };
+            this.Controls.Add(lblHeader);
+
+            Label lblCvv = new Label
+            {
+                Text = "Introduceți CVV-ul cardului:",
+                Location = new Point(20, 60),
+                AutoSize = true
+            };
+            this.Controls.Add(lblCvv);
+
+            TextBox txtCvv = new TextBox
+            {
+                Location = new Point(20, 90),
+                Width = 100,
+                MaxLength = 3,
+                PasswordChar = '*'
+            };
+            this.Controls.Add(txtCvv);
+
+            Button btnAnuleaza = new Button
+            {
+                Text = "Stergere Card",
+                Location = new Point(20, 130),
+                Size = new Size(120, 30),
+                BackColor = Color.LightCoral
+            };
+            btnAnuleaza.Click += (s, e) =>
+            {
+                if (txtCvv.Text.Length != 3 || !txtCvv.Text.All(char.IsDigit))
+                {
+                    MessageBox.Show("CVV invalid! Introduceți exact 3 cifre.");
+                    return;
+                }
+
+                AnulareCard(idCont, txtCvv.Text);
+            };
+            this.Controls.Add(btnAnuleaza);
+
+            Button btnBack = new Button
+            {
+                Text = "Înapoi",
+                Location = new Point(150, 130),
+                Size = new Size(80, 30),
+                BackColor = Color.LightGray
+            };
+            btnBack.Click += (s, e) => MeniuUtilizator();
+            this.Controls.Add(btnBack);
+        }
+
+        public bool AnulareCard(int idCont, string cvv)
+        {
+            try
+            {
+                var cont = conturi.FirstOrDefault(c => c.Id == idCont);
+                if (cont == null)
+                {
+                    MessageBox.Show("Contul nu există!");
+                    return false;
+                }
+
+                var card = cont.carduri.FirstOrDefault(c => c.CVV.ToString() == cvv);
+                if (card == null)
+                {
+                    MessageBox.Show("Nu există niciun card cu acest CVV în cont!");
+                    return false;
+                }
+
+                var confirmResult = MessageBox.Show(
+                    $"Sigur doriți să anulați cardul cu numărul {FormatCardNumber(card.NumarCard)}?",
+                    "Confirmare anulare card",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (confirmResult != DialogResult.Yes)
+                    return false;
+
+                cont.carduri.Remove(card);
+
+                ActualizeazaFisierCarduri();
+
+                MessageBox.Show("Card anulat cu succes!");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Eroare la anulare card: {ex.Message}");
+                return false;
+            }
+        }
+
+        private void SetupGestionare(int idCont)
+        {
+            this.Controls.Clear();
+            this.Text = "Gestionare Carduri";
+            this.AutoScroll = true;
+            var cont = conturi.FirstOrDefault(c => c.Id == idCont);
+            if (cont == null || cont.carduri.Count == 0)
+            {
+                Label lblNoCards = new Label
+                {
+                    Text = "Nu aveți niciun card asociat contului",
+                    Location = new Point(20, 20),
+                    AutoSize = true
+                };
+                this.Controls.Add(lblNoCards);
+                AddBackButton();
+                return;
+            }
+
+            Label lblTitle = new Label
+            {
+                Text = $"Gestionare Carduri - {cont.Nume} {cont.Prenume}",
+                Font = new Font("Arial", 14, FontStyle.Bold),
+                Location = new Point(20, 20),
+                AutoSize = true
+            };
+            this.Controls.Add(lblTitle);
+
+            ComboBox cmbCarduri = new ComboBox
+            {
+                Location = new Point(20, 60),
+                Width = 300,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            
+            foreach (var card in cont.carduri)
+            {
+                cmbCarduri.Items.Add($"Card: {FormatCardNumber(card.NumarCard)} | Exp: {card.DataExpirare:MM/yyyy} | Sold: {card.SoldInitial} {card.Moneda}");
+            }
+            cmbCarduri.SelectedIndex = 0;
+            this.Controls.Add(cmbCarduri);
+
+            int buttonY = 100;
+
+            Button btnDetalii = new Button
+            {
+                Text = "Detalii Card",
+                Location = new Point(20, buttonY),
+                Size = new Size(120, 30),
+                BackColor = Color.LightBlue
+            };
+            btnDetalii.Click += (s, e) => ShowCardDetails(cont.carduri[cmbCarduri.SelectedIndex]);
+            this.Controls.Add(btnDetalii);
+
+            Button btnSchimbaPin = new Button
+            {
+                Text = "Schimbă PIN",
+                Location = new Point(160, buttonY),
+                Size = new Size(120, 30),
+                BackColor = Color.LightGreen
+            };
+            btnSchimbaPin.Click += (s, e) => SetupSchimbaPin(cont.carduri[cmbCarduri.SelectedIndex]);
+            this.Controls.Add(btnSchimbaPin);
+            buttonY += 40;
+
+            Button btnToggleStatus = new Button
+            {
+                Text = cont.carduri[cmbCarduri.SelectedIndex].EsteActiv ? "Blochează Card" : "Activează Card",
+                Location = new Point(20, buttonY),
+                Size = new Size(120, 30),
+                BackColor = cont.carduri[cmbCarduri.SelectedIndex].EsteActiv ? Color.Orange : Color.LimeGreen,
+                Tag = cmbCarduri.SelectedIndex 
+            };
+
+            cmbCarduri.SelectedIndexChanged += (s, e) =>
+            {
+                btnToggleStatus.Text = cont.carduri[cmbCarduri.SelectedIndex].EsteActiv ? "Blochează Card" : "Activează Card";
+                btnToggleStatus.BackColor = cont.carduri[cmbCarduri.SelectedIndex].EsteActiv ? Color.Orange : Color.LimeGreen;
+                btnToggleStatus.Tag = cmbCarduri.SelectedIndex; 
+            };
+
+            btnToggleStatus.Click += (s, e) =>
+            {
+                int selectedIndex = (int)btnToggleStatus.Tag;
+                ToggleCardStatus(cont.carduri[selectedIndex], btnToggleStatus);
+            }; 
+            this.Controls.Add(btnToggleStatus);
+            buttonY += 40;
+            Button btnDepunere = new Button
+            {
+                Text = "Depunere",
+                Location = new Point(20, buttonY),
+                Size = new Size(100, 30),
+                BackColor = Color.LightGreen,
+                Tag = cmbCarduri.SelectedIndex
+            };
+            btnDepunere.Click += (s, e) =>
+            {
+                int selectedIndex = cmbCarduri.SelectedIndex;
+                ShowOperatiunePanel(cont.carduri[selectedIndex], "DEPUNERE", cont.Id);
+            };
+            this.Controls.Add(btnDepunere);
+
+            Button btnRetragere = new Button
+            {
+                Text = "Retragere",
+                Location = new Point(130, buttonY),
+                Size = new Size(100, 30),
+                BackColor = Color.LightSalmon,
+                Tag = cmbCarduri.SelectedIndex
+            };
+            btnRetragere.Click += (s, e) =>
+            {
+                int selectedIndex = cmbCarduri.SelectedIndex;
+                ShowOperatiunePanel(cont.carduri[selectedIndex], "RETRAGERE", cont.Id);
+            };
+            this.Controls.Add(btnRetragere);
+
+            buttonY += 40;
+
+            if (cont.carduri.Count > 1)
+            {
+                Button btnTransfer = new Button
+                {
+                    Text = "Transfer",
+                    Location = new Point(20, buttonY),
+                    Size = new Size(100, 30),
+                    BackColor = Color.LightSkyBlue,
+                    Tag = cmbCarduri.SelectedIndex
+                };
+                btnTransfer.Click += (s, e) =>
+                {
+                    int selectedIndex = cmbCarduri.SelectedIndex;
+                    SetupTransferIntreCarduri(cont, selectedIndex);
+                };
+                this.Controls.Add(btnTransfer);
+            }
+            AddBackButton();
+        }
+
+        
+
+        private void ShowOperatiunePanel(Card card, string tipOperatiune, int idCont)
+        {
+            this.Controls.Clear();
+            Panel pnlOperatiune = new Panel
+            {
+                Location = new Point(20, 20),
+                Size = new Size(200, 150),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.AliceBlue
+            };
+
+            Label lblTitle = new Label
+            {
+                Text = tipOperatiune,
+                Font = new Font("Arial", 10, FontStyle.Bold),
+                Location = new Point(10, 10),
+                AutoSize = true
+            };
+
+            NumericUpDown nudSuma = new NumericUpDown
+            {
+                Minimum = 10,
+                Maximum = 10000,
+                Increment = 10,
+                Value = 100,
+                Location = new Point(10, 40),
+                Width = 150
+            };
+
+            Button btnConfirm = new Button
+            {
+                Text = "Confirmă",
+                Location = new Point(10, 80),
+                Size = new Size(80, 30),
+                BackColor = Color.LightGreen,
+                Tag = new Tuple<Card, string>(card, tipOperatiune)
+            };
+            btnConfirm.Click += (s, e) => ProceseazaOperatiune(
+                ((Tuple<Card, string>)btnConfirm.Tag).Item1,
+                (decimal)nudSuma.Value,
+                ((Tuple<Card, string>)btnConfirm.Tag).Item2
+            );
+            Button btnBack = new Button
+            {
+                Text = "Înapoi",
+                Location = new Point(105, 80),
+                Size = new Size(80, 30),
+                BackColor = Color.LightGray
+            };
+            btnBack.Click += (s, e) => SetupGestionare(idCont);
+            this.Controls.Add(btnBack);
+            pnlOperatiune.Controls.AddRange(new Control[] { lblTitle, nudSuma, btnConfirm, btnBack });
+            this.Controls.Add(pnlOperatiune);
+            
+        }
+
+        private void ProceseazaOperatiune(Card card, decimal suma, string tipOperatiune)
+        {
+            if (!card.EsteActiv)
+            {
+                MessageBox.Show("Cardul este blocat! Nu puteți efectua operații.");
+                return;
+            }
+            try
+            {
+                switch (tipOperatiune)
+                {
+                    case "DEPUNERE":
+                        card.SoldInitial += (double)suma;
+                        break;
+
+                    case "RETRAGERE":
+                        if (card.SoldInitial >= (double)suma)
+                        {
+                            card.SoldInitial -= (double)suma;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Fonduri insuficiente!");
+                            return;
+                        }
+                        break;
+                }
+
+                ActualizeazaFisierCarduri();
+                MessageBox.Show($"{tipOperatiune} realizată cu succes!\nNoul sold: {card.SoldInitial} {card.Moneda}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Eroare: {ex.Message}");
+            }
+        }
+
+        private void SetupTransferIntreCarduri(ContBancar cont, int indexCardSursa)
+        {
+            this.Controls.Clear();
+
+            Label lblTitle = new Label
+            {
+                Text = "Transfer între carduri",
+                Font = new Font("Arial", 14, FontStyle.Bold),
+                Location = new Point(20, 20),
+                AutoSize = true
+            };
+            this.Controls.Add(lblTitle);
+
+            Label lblSursa = new Label
+            {
+                Text = $"Din cardul: {FormatCardNumber(cont.carduri[indexCardSursa].NumarCard)}",
+                Location = new Point(20, 60),
+                AutoSize = true
+            };
+            this.Controls.Add(lblSursa);
+
+            ComboBox cmbDestinatie = new ComboBox
+            {
+                Location = new Point(20, 90),
+                Width = 300,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+
+            for (int i = 0; i < cont.carduri.Count; i++)
+            {
+                if (i != indexCardSursa)
+                {
+                    cmbDestinatie.Items.Add(new { Index = i, Text = $"Card: {FormatCardNumber(cont.carduri[i].NumarCard)} ({cont.carduri[i].Moneda})" });
+                }
+            }
+            cmbDestinatie.DisplayMember = "Text";
+            cmbDestinatie.ValueMember = "Index";
+            cmbDestinatie.SelectedIndex = 0;
+            this.Controls.Add(cmbDestinatie);
+
+            NumericUpDown nudSuma = new NumericUpDown
+            {
+                Minimum = 10,
+                Maximum = 10000,
+                Increment = 10,
+                Value = 100,
+                Location = new Point(20, 130),
+                Width = 150
+            };
+            this.Controls.Add(nudSuma);
+
+            Button btnTransfer = new Button
+            {
+                Text = "Efectuează transfer",
+                Location = new Point(20, 170),
+                Size = new Size(150, 30),
+                BackColor = Color.LightBlue
+            };
+            btnTransfer.Click += (s, e) =>
+            {
+                var selected = (dynamic)cmbDestinatie.SelectedItem;
+                ProceseazaTransfer(
+                    cont.carduri[indexCardSursa],
+                    cont.carduri[(int)selected.Index],
+                    (decimal)nudSuma.Value
+                );
+            };
+            this.Controls.Add(btnTransfer);
+            ActualizeazaFisierCarduri();
+            AddBackButton();
+        }
+
+        private void ProceseazaTransfer(Card sursa, Card destinatie, decimal suma)
+        {
+            if (sursa.Moneda != destinatie.Moneda)
+            {
+                MessageBox.Show("Transferul între monede diferite nu este permis!");
+                return;
+            }
+
+            if (sursa.SoldInitial < (double)suma)
+            {
+                MessageBox.Show("Fonduri insuficiente în cardul sursă!");
+                return;
+            }
+
+            sursa.SoldInitial -= (double)suma;
+            destinatie.SoldInitial += (double)suma;
+
+            ActualizeazaFisierCarduri();
+            MessageBox.Show($"Transfer realizat cu succes!\nNoul sold: {sursa.SoldInitial} {sursa.Moneda}");
+            SetupGestionare(sursa.Id);
+        }
+
+        private void ShowCardDetails(Card card)
+        {
+            string detalii = $"Număr card: {FormatCardNumber(card.NumarCard)}\n" +
+                            $"Data expirare: {card.DataExpirare:MM/yyyy}\n" +
+                            $"Monedă: {card.Moneda}\n" +
+                            $"Sold curent: {card.SoldInitial} {card.Moneda}\n" +
+                            $"Status: {(card.EsteActiv ? "Activ" : "Blocat")}";
+
+            MessageBox.Show(detalii, "Detalii Card");
+        }
+
+        private void SetupSchimbaPin(Card card)
+        {
+            Form inputForm = new Form
+            {
+                Width = 300,
+                Height = 230,
+                Text = "Schimbare PIN"
+            };
+
+            TextBox txtPinVechi = new TextBox { Location = new Point(20, 20), Width = 100, PasswordChar = '*' };
+            TextBox txtPinNou = new TextBox { Location = new Point(20, 60), Width = 100, PasswordChar = '*' };
+            TextBox txtConfirmaPin = new TextBox { Location = new Point(20, 100), Width = 100, PasswordChar = '*' };
+
+            inputForm.Controls.AddRange(new Control[]
+            {
+                new Label { Text = "PIN vechi:", Location = new Point(20, 0) },
+                txtPinVechi,
+                new Label { Text = "PIN nou:", Location = new Point(20, 40) },
+                txtPinNou,
+                new Label { Text = "Confirmă PIN:", Location = new Point(20, 80) },
+                txtConfirmaPin,
+                new Button {
+                    Text = "Confirmă",
+                    Location = new Point(150, 140),
+                    DialogResult = DialogResult.OK
+                 }
+            });
+
+            if (inputForm.ShowDialog() == DialogResult.OK)
+            {
+                if (txtPinVechi.Text != card.PIN)
+                {
+                    MessageBox.Show("PIN vechi incorect!");
+                    return;
+                }
+
+                if (txtPinNou.Text != txtConfirmaPin.Text)
+                {
+                    MessageBox.Show("PIN-urile nu coincid!");
+                    return;
+                }
+                bool succes = int.TryParse(txtPinNou.Text, out int pinNou);
+                if (succes = false || pinNou<=999)
+                {
+                    MessageBox.Show("PIN invalid! Introduceți exact 4 cifre.");
+                    return;
+                }
+
+
+                card.PIN = txtPinNou.Text;
+                ActualizeazaFisierCarduri();
+                MessageBox.Show("PIN schimbat cu succes!");
+            }
+
+        }
+
+        private void ToggleCardStatus(Card card, Button btnToggle)
+        {
+            card.EsteActiv = !card.EsteActiv;
+            btnToggle.Text = card.EsteActiv ? "Blochează Card" : "Activează Card";
+            btnToggle.BackColor = card.EsteActiv ? Color.Orange : Color.LimeGreen;
+            MessageBox.Show($"Card {(card.EsteActiv ? "activat" : "blocat")} cu succes!");
+            ActualizeazaFisierCarduri();
+        }
+
+
+        private void AddBackButton()
+        {
+            Button btnBack = new Button
+            {
+                Text = "Înapoi",
+                Location = new Point(350, 20),
+                Size = new Size(80, 30),
+                BackColor = Color.LightGray
+            };
+            btnBack.Click += (s, e) => MeniuUtilizator();
+            this.Controls.Add(btnBack);
+        }
+
+        
+        
 
         private void BtnDelogare_Click(object sender, EventArgs e)
         {
@@ -682,233 +1443,7 @@ namespace InterfataUtilizator_WindowsForms
             }
         }
 
-        private void AfiseazaConturiSiCarduri(int idContLogat)
-        {
-            this.AutoScroll = true;
-            this.AutoScrollMargin = new Size(0, 20);
-            this.AutoScrollMinSize = new Size(800, 1000);
 
-            
-            foreach (var control in this.Controls.OfType<Control>().Where(c => c.Tag?.ToString() == "accountDisplay").ToList())
-            {
-                this.Controls.Remove(control);
-            }
-
-            
-            
-            foreach (Control control in this.Controls)
-            {
-                if (control is Panel panel && panel.BackColor == Color.AliceBlue)
-                {
-                    panel.Visible = false;
-                    break;
-                }
-            }
-            int startY = idContLogat == 0 ? 50 : 20; 
-
-            if (conturi == null || conturi.Count == 0)
-            {
-                Label lblEmpty = new Label { Text = "Nu există conturi de afișat", Location = new Point(20, startY), AutoSize = true };
-                this.Controls.Add(lblEmpty);
-                return;
-            }
-
-            
-            var conturiDeAfisat = idContLogat == 0
-                ? conturi
-                : conturi.Where(c => c.Id == idContLogat).ToList();
-
-            foreach (var cont in conturiDeAfisat)
-            {
-                
-                if (idContLogat == 0) 
-                {
-                    
-                }
-                else 
-                {
-                    var lblInfoCont = new Label
-                    {
-                        Text = $"Contul tău: {cont.Nume} {cont.Prenume} ({cont.TipCont}) - IBAN: {cont.IBAN}",
-                        Location = new Point(20, startY),
-                        AutoSize = true,
-                        Font = new Font("Arial", 10, FontStyle.Bold)
-                    };
-                    this.Controls.Add(lblInfoCont);
-                    startY += 30;
-
-
-                    if (cont.carduri.Count > 0)
-                    {
-                        foreach (var card in cont.carduri)
-                        {
-                            string cardInfo = $"• Card: {FormatCardNumber(card.NumarCard)} " +
-                                            $"Exp: {card.DataExpirare:MM/yyyy} " +
-                                            $"Sold: {card.SoldInitial} {card.Moneda}";
-
-                            Label lblCard = new Label
-                            {
-                                Text = cardInfo,
-                                Location = new Point(40, startY),
-                                ForeColor = Color.DarkBlue,
-                                AutoSize = true
-                            };
-                            this.Controls.Add(lblCard);
-                            startY += 25;
-                        }
-                    }
-                    else
-                    {
-                        Label lblNoCards = new Label
-                        {
-                            Text = "Nu există carduri asociate",
-                            Location = new Point(40, startY + 5),
-                            ForeColor = Color.Gray,
-                            Font = new Font("Arial", 8, FontStyle.Italic)
-                        };
-                        this.Controls.Add(lblNoCards);
-                        startY += 25;
-                    }
-                }
-
-                             
-            }
-            //if (idContLogat != 0)
-            //{
-            //    btnDelogare = new Button
-            //    {
-            //        Text = "Delogare",
-            //        Location = new Point(250, 200),
-            //        Size = new Size(100, 30),
-            //        BackColor = Color.LightCoral,
-            //    };
-            //    btnDelogare.Click += BtnDelogare_Click;
-            //    this.Controls.Add(btnDelogare);
-            //}
-        }
-
-        private void SetupAddAccountControls(Panel container)
-        {
-            Label lblAdaugaCont = new Label
-            {
-                Text = "Adaugă Cont Nou",
-                Location = new Point(10, 10),
-                AutoSize = true,
-                Font = new Font("Arial", 12, FontStyle.Bold)
-            };
-            container.Controls.Add(lblAdaugaCont);
-
-            // Nume
-            Label lblNume = new Label { Text = "Nume:", Location = new Point(10, 40), AutoSize = true };
-            txtNume = new TextBox { Location = new Point(100-10, 50-10), Width = 150 };
-            container.Controls.Add(lblNume);
-            container.Controls.Add(txtNume);
-
-            // Prenume
-            Label lblPrenume = new Label { Text = "Prenume:", Location = new Point(20 - 10, 80 - 10), AutoSize = true };
-            txtPrenume = new TextBox { Location = new Point(100 - 10, 80 - 10), Width = 150 };
-            container.Controls.Add(lblPrenume);
-            container.Controls.Add(txtPrenume);
-
-            // Email
-            Label lblEmail = new Label { Text = "Email:", Location = new Point(20 - 10, 110 - 10), AutoSize = true };
-            txtEmail = new TextBox { Location = new Point(100 - 10, 110 - 10), Width = 150 };
-            container.Controls.Add(lblEmail);
-            container.Controls.Add(txtEmail);
-
-            // Parola
-            Label lblParola = new Label { Text = "Parola:", Location = new Point(270, 140 - 100), AutoSize = true };
-            txtParola = new TextBox { Location = new Point(340, 40), Width = 150, PasswordChar = '*' };
-            container.Controls.Add(lblParola);
-            container.Controls.Add(txtParola);
-
-            // Tip Cont
-            Label lblTipCont = new Label { Text = "Tip Cont:", Location = new Point(270, 70), AutoSize = true };
-            cmbTipCont = new ComboBox
-            {
-                Location = new Point(340, 70),
-                Width = 150,
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            cmbTipCont.Items.AddRange(new string[] { "ContCurent", "ContEconomii","ContInvestitii", "ContFirma" });
-            cmbTipCont.SelectedIndex = 0;
-            container.Controls.Add(lblTipCont);
-            container.Controls.Add(cmbTipCont);
-
-            // Banca
-            Label lblBanca = new Label { Text = "Banca:", Location = new Point(270, 100), AutoSize = true };
-            cmbBanca = new ComboBox
-            {
-                Location = new Point(340, 100),
-                Width = 150,
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            cmbBanca.Items.AddRange(new string[] { "BTRL", "BNDR", "RFSN", "INGr" } );
-            cmbBanca.SelectedIndex = 0;
-            container.Controls.Add(lblBanca);
-            container.Controls.Add(cmbBanca);
-
-            btnAdaugaCont = new Button
-            {
-                Text = "Adaugă Cont",
-                Location = new Point(510, 70),
-                Size = new Size(100, 30),
-                BackColor = Color.LightGreen
-            };
-            btnAdaugaCont.Click += BtnAdaugaCont_Click;
-            container.Controls.Add(btnAdaugaCont);
-            
-        }
-
-        private void BtnAdaugaCont_Click(object sender, EventArgs e)
-        {
-
-            if (string.IsNullOrWhiteSpace(txtNume.Text) ||
-                string.IsNullOrWhiteSpace(txtPrenume.Text) ||
-                string.IsNullOrWhiteSpace(txtEmail.Text) ||
-                string.IsNullOrWhiteSpace(txtParola.Text))
-            {
-                MessageBox.Show("Toate câmpurile sunt obligatorii!", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            try
-            {
-                
-                int newId = conturi.Count > 0 ? conturi.Max(c => c.Id) + 1 : 1;
-
-                
-                ContBancar newCont = new ContBancar(
-                    id: newId,
-                    nume: txtNume.Text,
-                    prenume: txtPrenume.Text,
-                    email: txtEmail.Text,
-                    parola: txtParola.Text,
-                    tipcont: cmbTipCont.SelectedItem.ToString(),
-                    banca: cmbBanca.SelectedItem.ToString(),
-                    ib: 0 
-                );
-
-                
-                conturi.Add(newCont);
-                ManagerCont.SalveazaConturiInFisier(@"..\\..\\..\\conturi.txt", conturi);
-                
-                txtNume.Clear();
-                txtPrenume.Clear();
-                txtEmail.Clear();
-                txtParola.Clear();
-                cmbTipCont.SelectedIndex = 0;
-                cmbBanca.SelectedIndex = 0;
-
-                RefreshAccountDisplay();
-
-                MessageBox.Show("Cont adăugat cu succes!", "Succes", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Eroare la adăugarea contului: {ex.Message}", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
         private void RefreshAccountDisplay()
         {
 
@@ -923,76 +1458,6 @@ namespace InterfataUtilizator_WindowsForms
                 SetupLoginForm();
                 this.Controls.Add(pnlLogin);
             }
-        }
-
-        private void ShowAdminMenu()
-        {
-            this.Controls.Clear();
-            this.Text = "Panou Administrator";
-            this.Size = new Size(500, 400);
-
-            Label lblTitle = new Label
-            {
-                Text = "Meniu Administrator",
-                Font = new Font("Arial", 16, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(150, 50)
-            };
-            this.Controls.Add(lblTitle);
-
-            
-            Button btnViewAll = new Button
-            {
-                Text = "Vizualizare Conturi",
-                Location = new Point(150, 120),
-                Size = new Size(200, 40),
-                BackColor = Color.LightBlue
-            };
-            btnViewAll.Click += (s, e) => {
-                this.Controls.Clear();
-                AfiseazaConturiAdmin();
-                AddBackToMenuButton(100);
-            };
-            this.Controls.Add(btnViewAll);
-
-            
-            Button btnAddAccount = new Button
-            {
-                Text = "Adăugare Cont Nou",
-                Location = new Point(150, 180),
-                Size = new Size(200, 40),
-                BackColor = Color.LightGreen
-            };
-            btnAddAccount.Click += (s, e) => {
-                this.Controls.Clear();
-                Create(s, e); 
-                AddBackToMenuButton(0);
-            };
-            this.Controls.Add(btnAddAccount);
-
-            Button btnDelete = new Button
-            {
-                Text = "Stergere Cont",
-                Location = new Point(150, 240),
-                Size = new Size(200, 40),
-                BackColor = Color.Red
-            };
-            btnDelete.Click += (s, e) => {
-                this.Controls.Clear();
-                Delete(s, e);
-                AddBackToMenuButton(0);
-            };
-            this.Controls.Add(btnDelete);
-
-            Button btnLogout = new Button
-            {
-                Text = "Delogare",
-                Location = new Point(150, 300),
-                Size = new Size(200, 40),
-                BackColor = Color.LightCoral
-            };
-            btnLogout.Click += BtnDelogare_Click;
-            this.Controls.Add(btnLogout);
         }
 
         private void Delete(object sender, EventArgs e)
@@ -1134,30 +1599,7 @@ namespace InterfataUtilizator_WindowsForms
             }
         }
 
-        private void AddBackToMenuButton(int x)
-        {
-            Button btnBack = new Button
-            {
-                Text = "Înapoi la Meniu",
-                Location = new Point(10, 200+x),
-                Size = new Size(120, 30),
-                BackColor = Color.LightGray
-            };
-            btnBack.Click += (s, e) => {
-                this.Controls.Clear();
-                ShowAdminMenu();
-            };
-            this.Controls.Add(btnBack);
-        }
-
-        private string FormatCardNumber(string cardNumber)
-        {
-            if (string.IsNullOrEmpty(cardNumber) || cardNumber.Length != 16)
-                return cardNumber;
-
-            return $"{cardNumber.Substring(0, 4)} {cardNumber.Substring(4, 4)} " +
-                   $"{cardNumber.Substring(8, 4)} {cardNumber.Substring(12, 4)}";
-        }
         
+   
     }
 }

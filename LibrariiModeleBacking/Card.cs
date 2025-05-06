@@ -16,6 +16,7 @@ namespace LibrariiModeleBanking
         }
         public const Valuta Standard = Valuta.RON;
 
+        public bool EsteActiv { get; set; } = true;
         public int Id { get; set; }
         public int CVV { get; set; }
         public DateTime DataExpirare { get; set; }
@@ -24,7 +25,7 @@ namespace LibrariiModeleBanking
         public double SoldInitial { get; set; }
         public string Moneda { get; set; }
         public Card() { }
-        public Card(int id,int CVV, DateTime DataExpirare, string NumarCard, string Pin, double sold, string moneda)
+        public Card(int id,int CVV, DateTime DataExpirare, string NumarCard, string Pin, double sold, string moneda, bool esteActiv)
         {
             this.Id = id;
             this.CVV = CVV;
@@ -33,11 +34,12 @@ namespace LibrariiModeleBanking
             this.PIN = Pin;
             this.SoldInitial = sold;
             this.Moneda = moneda;
+            this.EsteActiv = esteActiv;
         }
         public override string ToString()
         {
             string NumarFormat = NumarCard.Substring(0, 4) + " " + NumarCard.Substring(4, 4) + " " + NumarCard.Substring(8, 4) + " " + NumarCard.Substring(12, 4);
-            return $"{Id};{NumarCard};{CVV};{DataExpirare.ToString("dd/MM/yyyy")};{PIN};{SoldInitial};{Moneda}";
+            return $"{Id};{NumarCard};{CVV};{DataExpirare.ToString("dd/MM/yyyy")};{PIN};{SoldInitial};{Moneda};{(EsteActiv ? 1 : 0)}";
 
         }
         public Card CardNou(int id)
@@ -71,7 +73,7 @@ namespace LibrariiModeleBanking
                 Console.WriteLine("Introduceti suma pe care doriti sa o adaugati in cont:");
                 sum = Convert.ToDouble(Console.ReadLine());
             }
-            Card card1 = new Card(id,r, DateTime.Today.AddYears(4), Digits, pin, sum, mod.ToString());
+            Card card1 = new Card(id,r, DateTime.Today.AddYears(4), Digits, pin, sum, mod.ToString(),true);
             return card1;
         }
         private static HashSet<string> Results = new HashSet<string>();
