@@ -4,22 +4,24 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using LibrariiModeleBanking;
 using Managers;
+
 
 namespace InterfataUtilizator_WindowsForms
 {
     public partial class Form1 : Form
     {
-        
+
         private Label lblIdHeader;
         private Label lblNumeHeader;
         private Label lblPrenumeHeader;
         private Label lblTipContHeader;
         private Label lblIbanHeader;
 
-        
+
         private Label[] lblsId;
         private Label[] lblsNume;
         private Label[] lblsPrenume;
@@ -48,7 +50,7 @@ namespace InterfataUtilizator_WindowsForms
         private bool isLoggedIn = false;
         private ContBancar contLogat = null;
 
-        
+
         private Panel pnlLogin;
         private TextBox txtLoginEmail;
         private TextBox txtLoginParola;
@@ -61,6 +63,7 @@ namespace InterfataUtilizator_WindowsForms
         public Form1(List<ContBancar> conturi)
         {
             InitializeComponent();
+            this.Icon = InterfataUtilizator_WindowsForms.Properties.Resources.wallet_icon_16x16;
             this.conturi = conturi ?? new List<ContBancar>();
             SetupLoginForm();
             this.Controls.Clear();
@@ -69,6 +72,8 @@ namespace InterfataUtilizator_WindowsForms
         }
         private void SetupLoginForm()
         {
+            this.Text = "Logare Cont Bancar";
+            this.Icon = InterfataUtilizator_WindowsForms.Properties.Resources.wallet_icon_16x16;
             this.AutoScroll = false;
             pnlLogin = new Panel
             {
@@ -77,7 +82,7 @@ namespace InterfataUtilizator_WindowsForms
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.WhiteSmoke
             };
-            
+
 
             Label lblTitle = new Label
             {
@@ -165,8 +170,10 @@ namespace InterfataUtilizator_WindowsForms
         }
         private void Create(object sender, EventArgs e)
         {
+            this.Text = "Creare Cont Bancar";
             this.Size = new Size(700, 600);
             this.Controls.Remove(pnlLogin);
+            this.Icon = InterfataUtilizator_WindowsForms.Properties.Resources.wallet_icon_16x16;
             Panel addPanel = new Panel
             {
                 Location = new Point(10, 10),
@@ -176,7 +183,7 @@ namespace InterfataUtilizator_WindowsForms
             };
             this.Controls.Add(addPanel);
 
-           
+
             SetupAddAccountControls(addPanel);
 
             lblIdHeader = new Label { Text = "ID", Location = new Point(20, 20), AutoSize = true, Font = new Font("Arial", 10, FontStyle.Bold) };
@@ -190,10 +197,10 @@ namespace InterfataUtilizator_WindowsForms
             this.Controls.Add(lblPrenumeHeader);
             this.Controls.Add(lblTipContHeader);
             this.Controls.Add(lblIbanHeader);
-            
+
 
         }
-        
+
 
         private void SetupForm()
         {
@@ -202,11 +209,11 @@ namespace InterfataUtilizator_WindowsForms
             this.AutoScroll = true;
             this.BackColor = Color.White;
 
-            if (contLogat.Id != 0) 
+            if (contLogat.Id != 0)
             {
                 MeniuUtilizator();
             }
-            else 
+            else
             {
                 ShowAdminMenu();
                 //AfiseazaConturiAdmin();
@@ -215,6 +222,8 @@ namespace InterfataUtilizator_WindowsForms
 
         private void SetupAddAccountControls(Panel container)
         {
+            this.Text = "Adaugă Cont Nou";
+            this.Icon = InterfataUtilizator_WindowsForms.Properties.Resources.wallet_icon_16x16;
             Label lblAdaugaCont = new Label
             {
                 Text = "Adaugă Cont Nou",
@@ -288,33 +297,52 @@ namespace InterfataUtilizator_WindowsForms
 
         private void BtnAdaugaCont_Click(object sender, EventArgs e)
         {
+            string nume = txtNume.Text.Trim();
+            string prenume = txtPrenume.Text.Trim();
+            string email = txtEmail.Text.Trim();
+            string parola = txtParola.Text;
 
-            if (string.IsNullOrWhiteSpace(txtNume.Text) ||
-                string.IsNullOrWhiteSpace(txtPrenume.Text) ||
-                string.IsNullOrWhiteSpace(txtEmail.Text) ||
-                string.IsNullOrWhiteSpace(txtParola.Text))
+            if (string.IsNullOrWhiteSpace(nume) ||
+                string.IsNullOrWhiteSpace(prenume) ||
+                string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(parola))
             {
                 MessageBox.Show("Toate câmpurile sunt obligatorii!", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
+            if (!Regex.IsMatch(nume, @"^[A-Za-zĂÎÂȘȚăîâșț\- ]{2,}$") || !Regex.IsMatch(prenume, @"^[A-Za-zĂÎÂȘȚăîâșț\- ]{2,}$"))
+            {
+                MessageBox.Show("Numele și prenumele trebuie să conțină doar litere și să aibă cel puțin 2 caractere.", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!Regex.IsMatch(email, @"^[a-zA-Z0-9._%+-]+@gmail\.com$"))
+            {
+                MessageBox.Show("Email-ul trebuie să fie valid și să aparțină domeniului @gmail.com.", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (parola.Length < 6 || !Regex.IsMatch(parola, @"[A-Za-z]") || !Regex.IsMatch(parola, @"\d"))
+            {
+                MessageBox.Show("Parola trebuie să aibă minim 6 caractere și să conțină cel puțin o literă și o cifră.", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
-
                 int newId = conturi.Count > 0 ? conturi.Max(c => c.Id) + 1 : 1;
-
 
                 ContBancar newCont = new ContBancar(
                     id: newId,
-                    nume: txtNume.Text,
-                    prenume: txtPrenume.Text,
-                    email: txtEmail.Text,
-                    parola: txtParola.Text,
+                    nume: nume,
+                    prenume: prenume,
+                    email: email,
+                    parola: parola,
                     tipcont: cmbTipCont.SelectedItem.ToString(),
                     banca: cmbBanca.SelectedItem.ToString(),
                     ib: 0
                 );
-
 
                 conturi.Add(newCont);
                 ManagerCont.SalveazaConturiInFisier(@"..\\..\\..\\conturi.txt", conturi);
@@ -356,24 +384,37 @@ namespace InterfataUtilizator_WindowsForms
         {
             this.Controls.Clear();
             this.Text = "Panou Utilizator";
-            this.Size = new Size(500, 400);
+            this.Icon = InterfataUtilizator_WindowsForms.Properties.Resources.wallet_icon_16x16;
+            this.Size = new Size(600, 550);
+            this.BackColor = ColorTranslator.FromHtml("#F5F5F5");
 
             Label lblTitle = new Label
             {
                 Text = "Meniu Utilizator",
-                Font = new Font("Arial", 16, FontStyle.Bold),
+                Font = new Font("Segoe UI", 18, FontStyle.Bold),
                 AutoSize = true,
-                Location = new Point(150, 50)
+                ForeColor = ColorTranslator.FromHtml("#333333"),
+                Location = new Point(200, 30)
             };
             this.Controls.Add(lblTitle);
 
+            int btnWidth = 220;
+            int btnHeight = 45;
+            int btnLeft = 190;
+            int spacing = 20;
+            int startY = 100;
 
             Button btnViewAll = new Button
             {
                 Text = "Vizualizare Carduri",
-                Location = new Point(150, 120),
-                Size = new Size(200, 40),
-                BackColor = Color.LightBlue
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(btnWidth, btnHeight),
+                Location = new Point(btnLeft, startY),
+                BackColor = ColorTranslator.FromHtml("#007ACC"),
+                ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             btnViewAll.Click += (s, e) => {
                 this.Controls.Clear();
@@ -382,13 +423,17 @@ namespace InterfataUtilizator_WindowsForms
             };
             this.Controls.Add(btnViewAll);
 
-
             Button btnAddCard = new Button
             {
                 Text = "Adăugare Card Nou",
-                Location = new Point(150, 180),
-                Size = new Size(200, 40),
-                BackColor = Color.LightGreen
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(btnWidth, btnHeight),
+                Location = new Point(btnLeft, startY + (btnHeight + spacing)),
+                BackColor = ColorTranslator.FromHtml("#4CAF50"),
+                ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             btnAddCard.Click += (s, e) => {
                 this.Controls.Clear();
@@ -399,9 +444,14 @@ namespace InterfataUtilizator_WindowsForms
             Button btnGestionare = new Button
             {
                 Text = "Gestionare Card",
-                Location = new Point(150, 240),
-                Size = new Size(200, 40),
-                BackColor = Color.LightPink
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(btnWidth, btnHeight),
+                Location = new Point(btnLeft, startY + 2 * (btnHeight + spacing)),
+                BackColor = ColorTranslator.FromHtml("#9C27B0"),
+                ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             btnGestionare.Click += (s, e) => {
                 this.Controls.Clear();
@@ -412,65 +462,95 @@ namespace InterfataUtilizator_WindowsForms
             Button btnDelete = new Button
             {
                 Text = "Stergere Card",
-                Location = new Point(150, 300),
-                Size = new Size(200, 40),
-                BackColor = Color.Red
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(btnWidth, btnHeight),
+                Location = new Point(btnLeft, startY + 3 * (btnHeight + spacing)),
+                BackColor = ColorTranslator.FromHtml("#E53935"),
+                ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             btnDelete.Click += (s, e) => {
                 this.Controls.Clear();
                 SetupAnulareCard(contLogat.Id);
-                
             };
             this.Controls.Add(btnDelete);
 
             Button btnLogout = new Button
             {
                 Text = "Delogare",
-                Location = new Point(150, 360),
-                Size = new Size(200, 40),
-                BackColor = Color.LightCoral
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(btnWidth, btnHeight),
+                Location = new Point(btnLeft, startY + 4 * (btnHeight + spacing)),
+                BackColor = ColorTranslator.FromHtml("#757575"),
+                ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             btnLogout.Click += BtnDelogare_Click;
             this.Controls.Add(btnLogout);
         }
 
+
+
+
+
         private void ShowAdminMenu()
         {
             this.Controls.Clear();
             this.Text = "Panou Administrator";
-            this.Size = new Size(500, 400);
+            this.Icon = InterfataUtilizator_WindowsForms.Properties.Resources.wallet_icon_16x16;
+            this.Size = new Size(600, 500);
+            this.BackColor = ColorTranslator.FromHtml("#F5F5F5");
 
             Label lblTitle = new Label
             {
                 Text = "Meniu Administrator",
-                Font = new Font("Arial", 16, FontStyle.Bold),
+                Font = new Font("Segoe UI", 18, FontStyle.Bold),
                 AutoSize = true,
-                Location = new Point(150, 50)
+                ForeColor = ColorTranslator.FromHtml("#333333"),
+                Location = new Point(180, 30)
             };
             this.Controls.Add(lblTitle);
 
+            int btnWidth = 220;
+            int btnHeight = 45;
+            int btnLeft = 190;
+            int spacing = 20;
+            int startY = 100;
 
             Button btnViewAll = new Button
             {
                 Text = "Vizualizare Conturi",
-                Location = new Point(150, 120),
-                Size = new Size(200, 40),
-                BackColor = Color.LightBlue
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(btnWidth, btnHeight),
+                Location = new Point(btnLeft, startY),
+                BackColor = ColorTranslator.FromHtml("#007ACC"),
+                ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             btnViewAll.Click += (s, e) => {
                 this.Controls.Clear();
                 AfiseazaConturiAdmin();
-                AddBackToMenuButton(100);
+                AddBackToMenuButton(180);
             };
             this.Controls.Add(btnViewAll);
-
 
             Button btnAddAccount = new Button
             {
                 Text = "Adăugare Cont Nou",
-                Location = new Point(150, 180),
-                Size = new Size(200, 40),
-                BackColor = Color.LightGreen
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(btnWidth, btnHeight),
+                Location = new Point(btnLeft, startY + (btnHeight + spacing)),
+                BackColor = ColorTranslator.FromHtml("#4CAF50"),
+                ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             btnAddAccount.Click += (s, e) => {
                 this.Controls.Clear();
@@ -482,27 +562,38 @@ namespace InterfataUtilizator_WindowsForms
             Button btnDelete = new Button
             {
                 Text = "Stergere Cont",
-                Location = new Point(150, 240),
-                Size = new Size(200, 40),
-                BackColor = Color.Red
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(btnWidth, btnHeight),
+                Location = new Point(btnLeft, startY + 2 * (btnHeight + spacing)),
+                BackColor = ColorTranslator.FromHtml("#E53935"),
+                ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             btnDelete.Click += (s, e) => {
                 this.Controls.Clear();
                 Delete(s, e);
-                AddBackToMenuButton(0);
             };
             this.Controls.Add(btnDelete);
 
             Button btnLogout = new Button
             {
                 Text = "Delogare",
-                Location = new Point(150, 300),
-                Size = new Size(200, 40),
-                BackColor = Color.LightCoral
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(btnWidth, btnHeight),
+                Location = new Point(btnLeft, startY + 3 * (btnHeight + spacing)),
+                BackColor = ColorTranslator.FromHtml("#757575"),
+                ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             btnLogout.Click += BtnDelogare_Click;
             this.Controls.Add(btnLogout);
         }
+
+
 
         private void AddBackToMenuButton(int x)
         {
@@ -522,7 +613,9 @@ namespace InterfataUtilizator_WindowsForms
 
         private void AfiseazaConturiAdmin()
         {
+            this.Text = "Conturi Bancare";
             int startY = 10;
+            this.Icon = InterfataUtilizator_WindowsForms.Properties.Resources.wallet_icon_16x16;
 
             Panel contentPanel = new Panel
             {
@@ -610,6 +703,7 @@ namespace InterfataUtilizator_WindowsForms
 
         private void AfiseazaConturiSiCarduri(int idContLogat)
         {
+            this.Text = "Conturi și Carduri";
             this.AutoScroll = true;
             this.AutoScrollMargin = new Size(0, 20);
             this.AutoScrollMinSize = new Size(800, 1000);
@@ -716,7 +810,7 @@ namespace InterfataUtilizator_WindowsForms
         private void SetupAddCardControls(int idCont)
         {
             this.Controls.Clear();
-
+            this.Text = "Adăugare Card Nou";
             Label lblTitle = new Label
             {
                 Text = "Adăugare Card Nou",
@@ -879,6 +973,7 @@ namespace InterfataUtilizator_WindowsForms
 
         private void ActualizeazaFisierCarduri()
         {
+            
             string caleFisier = @"..\\..\\..\\carduri.txt";
 
             var toateCardurile = conturi
@@ -898,7 +993,7 @@ namespace InterfataUtilizator_WindowsForms
         private void SetupAnulareCard(int idCont)
         {
             this.Controls.Clear();
-
+            this.Text = "Stergere Card";
             Label lblHeader = new Label
             {
                 Text = "Stergere Card",
@@ -1001,6 +1096,7 @@ namespace InterfataUtilizator_WindowsForms
             this.Controls.Clear();
             this.Text = "Gestionare Carduri";
             this.AutoScroll = true;
+
             var cont = conturi.FirstOrDefault(c => c.Id == idCont);
             if (cont == null || cont.carduri.Count == 0)
             {
@@ -1027,67 +1123,94 @@ namespace InterfataUtilizator_WindowsForms
             ComboBox cmbCarduri = new ComboBox
             {
                 Location = new Point(20, 60),
-                Width = 300,
+                Width = 500,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            
+
             foreach (var card in cont.carduri)
             {
                 cmbCarduri.Items.Add($"Card: {FormatCardNumber(card.NumarCard)} | Exp: {card.DataExpirare:MM/yyyy} | Sold: {card.SoldInitial} {card.Moneda}");
             }
+
             cmbCarduri.SelectedIndex = 0;
             this.Controls.Add(cmbCarduri);
 
-            int buttonY = 100;
+            int startY = 110;
+
+            GroupBox groupInfo = new GroupBox
+            {
+                Text = "Informații Card",
+                Location = new Point(20, startY),
+                Size = new Size(580, 60)
+            };
 
             Button btnDetalii = new Button
             {
                 Text = "Detalii Card",
-                Location = new Point(20, buttonY),
+                Location = new Point(20, 20),
                 Size = new Size(120, 30),
                 BackColor = Color.LightBlue
             };
             btnDetalii.Click += (s, e) => ShowCardDetails(cont.carduri[cmbCarduri.SelectedIndex]);
-            this.Controls.Add(btnDetalii);
+            groupInfo.Controls.Add(btnDetalii);
 
             Button btnSchimbaPin = new Button
             {
                 Text = "Schimbă PIN",
-                Location = new Point(160, buttonY),
+                Location = new Point(160, 20),
                 Size = new Size(120, 30),
                 BackColor = Color.LightGreen
             };
             btnSchimbaPin.Click += (s, e) => SetupSchimbaPin(cont.carduri[cmbCarduri.SelectedIndex]);
-            this.Controls.Add(btnSchimbaPin);
-            buttonY += 40;
+            groupInfo.Controls.Add(btnSchimbaPin);
+
+            this.Controls.Add(groupInfo);
+
+            startY += groupInfo.Height + 10;
+            GroupBox groupStatus = new GroupBox
+            {
+                Text = "Status Card",
+                Location = new Point(20, startY),
+                Size = new Size(580, 60)
+            };
 
             Button btnToggleStatus = new Button
             {
                 Text = cont.carduri[cmbCarduri.SelectedIndex].EsteActiv ? "Blochează Card" : "Activează Card",
-                Location = new Point(20, buttonY),
-                Size = new Size(120, 30),
+                Location = new Point(20, 20),
+                Size = new Size(150, 30),
                 BackColor = cont.carduri[cmbCarduri.SelectedIndex].EsteActiv ? Color.Orange : Color.LimeGreen,
-                Tag = cmbCarduri.SelectedIndex 
+                Tag = cmbCarduri.SelectedIndex
             };
 
             cmbCarduri.SelectedIndexChanged += (s, e) =>
             {
                 btnToggleStatus.Text = cont.carduri[cmbCarduri.SelectedIndex].EsteActiv ? "Blochează Card" : "Activează Card";
                 btnToggleStatus.BackColor = cont.carduri[cmbCarduri.SelectedIndex].EsteActiv ? Color.Orange : Color.LimeGreen;
-                btnToggleStatus.Tag = cmbCarduri.SelectedIndex; 
+                btnToggleStatus.Tag = cmbCarduri.SelectedIndex;
             };
 
             btnToggleStatus.Click += (s, e) =>
             {
                 int selectedIndex = (int)btnToggleStatus.Tag;
                 ToggleCardStatus(cont.carduri[selectedIndex], btnToggleStatus);
-            }; 
-            this.Controls.Add(btnToggleStatus);
-            buttonY += 40;
+            };
+
+            groupStatus.Controls.Add(btnToggleStatus);
+            this.Controls.Add(groupStatus);
+
+            startY += groupStatus.Height + 10;
+            GroupBox groupOperatiuni = new GroupBox
+            {
+                Text = "Operațiuni Financiare",
+                Location = new Point(20, startY),
+                Size = new Size(580, 60)
+            };
+
             Button btnDepunere = new Button
             {
                 Text = "Depunere",
-                Location = new Point(20, buttonY),
+                Location = new Point(20, 20),
                 Size = new Size(100, 30),
                 BackColor = Color.LightGreen,
                 Tag = cmbCarduri.SelectedIndex
@@ -1097,12 +1220,12 @@ namespace InterfataUtilizator_WindowsForms
                 int selectedIndex = cmbCarduri.SelectedIndex;
                 ShowOperatiunePanel(cont.carduri[selectedIndex], "DEPUNERE", cont.Id);
             };
-            this.Controls.Add(btnDepunere);
+            groupOperatiuni.Controls.Add(btnDepunere);
 
             Button btnRetragere = new Button
             {
                 Text = "Retragere",
-                Location = new Point(130, buttonY),
+                Location = new Point(130, 20),
                 Size = new Size(100, 30),
                 BackColor = Color.LightSalmon,
                 Tag = cmbCarduri.SelectedIndex
@@ -1112,16 +1235,24 @@ namespace InterfataUtilizator_WindowsForms
                 int selectedIndex = cmbCarduri.SelectedIndex;
                 ShowOperatiunePanel(cont.carduri[selectedIndex], "RETRAGERE", cont.Id);
             };
-            this.Controls.Add(btnRetragere);
+            groupOperatiuni.Controls.Add(btnRetragere);
 
-            buttonY += 40;
+            this.Controls.Add(groupOperatiuni);
 
             if (cont.carduri.Count > 1)
             {
+                startY += groupOperatiuni.Height + 10;
+                GroupBox groupTransfer = new GroupBox
+                {
+                    Text = "Transfer între Carduri",
+                    Location = new Point(20, startY),
+                    Size = new Size(580, 60)
+                };
+
                 Button btnTransfer = new Button
                 {
                     Text = "Transfer",
-                    Location = new Point(20, buttonY),
+                    Location = new Point(20, 20),
                     Size = new Size(100, 30),
                     BackColor = Color.LightSkyBlue,
                     Tag = cmbCarduri.SelectedIndex
@@ -1131,15 +1262,21 @@ namespace InterfataUtilizator_WindowsForms
                     int selectedIndex = cmbCarduri.SelectedIndex;
                     SetupTransferIntreCarduri(cont, selectedIndex);
                 };
-                this.Controls.Add(btnTransfer);
+
+                groupTransfer.Controls.Add(btnTransfer);
+                this.Controls.Add(groupTransfer);
             }
+
             AddBackButton();
         }
 
-        
+
+
+
 
         private void ShowOperatiunePanel(Card card, string tipOperatiune, int idCont)
         {
+            this.Text = $"{tipOperatiune} Card";
             this.Controls.Clear();
             Panel pnlOperatiune = new Panel
             {
@@ -1191,7 +1328,7 @@ namespace InterfataUtilizator_WindowsForms
             this.Controls.Add(btnBack);
             pnlOperatiune.Controls.AddRange(new Control[] { lblTitle, nudSuma, btnConfirm, btnBack });
             this.Controls.Add(pnlOperatiune);
-            
+
         }
 
         private void ProceseazaOperatiune(Card card, decimal suma, string tipOperatiune)
@@ -1234,7 +1371,7 @@ namespace InterfataUtilizator_WindowsForms
         private void SetupTransferIntreCarduri(ContBancar cont, int indexCardSursa)
         {
             this.Controls.Clear();
-
+            this.Text = "Transfer între Carduri";
             Label lblTitle = new Label
             {
                 Text = "Transfer între carduri",
@@ -1378,7 +1515,7 @@ namespace InterfataUtilizator_WindowsForms
                     return;
                 }
                 bool succes = int.TryParse(txtPinNou.Text, out int pinNou);
-                if (succes = false || pinNou<=999)
+                if (succes = false || pinNou <= pinVerif ||pinNou > pinVerifSup)
                 {
                     MessageBox.Show("PIN invalid! Introduceți exact 4 cifre.");
                     return;
@@ -1391,6 +1528,8 @@ namespace InterfataUtilizator_WindowsForms
             }
 
         }
+        public int pinVerif = 999;
+        public int pinVerifSup = 9999;
 
         private void ToggleCardStatus(Card card, Button btnToggle)
         {
@@ -1415,29 +1554,29 @@ namespace InterfataUtilizator_WindowsForms
             this.Controls.Add(btnBack);
         }
 
-        
-        
+
+
 
         private void BtnDelogare_Click(object sender, EventArgs e)
         {
-           
+
             var result = MessageBox.Show("Sigur doriți să vă delogați?", "Confirmare delogare",
                                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
-                
+
                 isLoggedIn = false;
                 contLogat = null;
 
-                
+
                 this.Controls.Clear();
 
-                
+
                 SetupLoginForm();
                 this.Controls.Add(pnlLogin);
 
-                
+
                 txtLoginEmail.Text = "";
                 txtLoginParola.Text = "";
             }
@@ -1462,6 +1601,7 @@ namespace InterfataUtilizator_WindowsForms
 
         private void Delete(object sender, EventArgs e)
         {
+            this.Text = "Ștergere Cont";
             Label lblEmail = new Label
             {
                 Text = "Introduceți emailul contului:",
@@ -1470,7 +1610,6 @@ namespace InterfataUtilizator_WindowsForms
             };
             this.Controls.Add(lblEmail);
 
-            // Adaugă TextBox pentru email
             TextBox txtEmailToDelete = new TextBox
             {
                 Location = new Point(10, 80),
@@ -1480,16 +1619,31 @@ namespace InterfataUtilizator_WindowsForms
             Button btnConfirmDelete = new Button
             {
                 Text = "Confirmă ștergerea",
-                Location = new Point(150, 170),
-                Size = new Size(150, 30),
+                Location = new Point(10, 130),
+                Size = new Size(120, 30),
                 BackColor = Color.LightCoral
             };
+            Button btnBack = new Button
+            {
+                Text = "Înapoi la Meniu",
+                Location = new Point(150, 130 ),
+                Size = new Size(120, 30),
+                BackColor = Color.LightGray
+            };
+            btnBack.Click += (s, ev) => ShowAdminMenu();
+            this.Controls.Add(btnBack);
             btnConfirmDelete.Click += (s, ev) => ConfirmDelete(txtEmailToDelete.Text);
             this.Controls.Add(btnConfirmDelete);
         }
+
+        private void BtnBack_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         private void ConfirmDelete(string email)
         {
-            
+            this.Text = "Ștergere Cont";
             this.Controls.Clear();
 
             var contToDelete = conturi.FirstOrDefault(c => c.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
@@ -1526,7 +1680,7 @@ namespace InterfataUtilizator_WindowsForms
             };
             this.Controls.Add(txtPassword);
 
-            
+
             Button btnConfirm = new Button
             {
                 Text = "Confirmă ștergerea",
@@ -1538,7 +1692,7 @@ namespace InterfataUtilizator_WindowsForms
             {
                 if (txtPassword.Text == contToDelete.Parola)
                 {
-                    
+
                     var result = MessageBox.Show($"Sigur doriți să ștergeți definitiv contul {contToDelete.Nume} {contToDelete.Prenume}?",
                                               "Confirmare ștergere definitivă",
                                               MessageBoxButtons.YesNo,
@@ -1546,7 +1700,7 @@ namespace InterfataUtilizator_WindowsForms
 
                     if (result == DialogResult.Yes)
                     {
-                        
+
                         contToDelete.carduri.Clear();
 
                         StergeCardurileContului(contToDelete.Id);
@@ -1569,18 +1723,18 @@ namespace InterfataUtilizator_WindowsForms
 
         private void StergeCardurileContului(int idCont)
         {
-            
+
             string caleFisierCarduri = @"..\\..\\..\\carduri.txt";
 
-           
+
             List<string> liniiCarduri = File.ReadAllLines(caleFisierCarduri).ToList();
 
-            
+
             List<string> liniiRamase = new List<string>();
 
             foreach (string linie in liniiCarduri)
             {
-                
+
                 string[] parts = linie.Split(';');
                 if (parts.Length > 0 && int.Parse(parts[0]) != idCont)
                 {
@@ -1588,10 +1742,10 @@ namespace InterfataUtilizator_WindowsForms
                 }
             }
 
-           
+
             File.WriteAllLines(caleFisierCarduri, liniiRamase);
 
-            
+
             var cont = conturi.FirstOrDefault(c => c.Id == idCont);
             if (cont != null && cont.carduri != null)
             {
@@ -1599,7 +1753,7 @@ namespace InterfataUtilizator_WindowsForms
             }
         }
 
-        
-   
+
+
     }
 }

@@ -320,6 +320,7 @@ namespace Managers
                             int idCont = int.Parse(date[0]);
                             string numarCard = date[1];
                             DateTime dataExpirare = DateTime.ParseExact(date[3], "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                            //DateTime dataExpirare = DateTime.ParseExact(date[3].Trim(), "dd/MM/yyyy", CultureInfo.InvariantCulture);
                             string pin = date[4];
                             int cvv = int.Parse(date[2]);
                             double sold = double.Parse(date[5]);
